@@ -111,71 +111,131 @@ class MinimaxAgent(MultiAgentSearchAgent):
       Your minimax agent (question 2)
     """
     def maximum(self, touple1, touple2): # (14, 'LEFT'), (20,'RIGHT')
-        if touple1[0] > touple2[0]:
-            #print(touple1)
-            return touple1
+        t1 = touple1[0]
+        t2 = touple2[0]
+        # First touple
+        if isinstance(t1, tuple):
+            if isinstance(t2, tuple):
+                # both tuple
+                if touple1[0][0] > touple2[0][0]:
+                    return touple1
+                else:
+                    return touple2
+            if touple1[0][0] > touple2[0]:
+                return touple1
+            else:
+                return touple2
         else:
-            #print(touple2)
-            return touple2
+            if isinstance(t2, tuple):
+                #print("DETTE CASET VI HAR ______________________________________________________")
+                if touple1[0] > touple2[0][0]:
+                    return touple1
+                else:
+                    return touple2
+            else:
+                if touple1[0] > touple2[0]:
+                    return touple1
+                else:
+                    return touple2
+
     def minimum(self, touple1, touple2): # (14, 'LEFT'), (20,'RIGHT')
-        if touple1[0] < touple2[0]:
-            #print(touple1)
-            return touple1
+        t1 = touple1[0]
+        t2 = touple2[0]
+        # First touple
+        if isinstance(t1, tuple):
+            if isinstance(t2, tuple):
+                # both tuple
+                if touple1[0][0] < touple2[0][0]:
+                    return touple1
+                else:
+                    return touple2
+            if touple1[0][0] < touple2[0]:
+                return touple1
+            else:
+                return touple2
         else:
-            #print(touple2)
-            return touple2
+            if isinstance(t2, tuple):
+                if touple1[0] < touple2[0][0]:
+                    return touple1
+                else:
+                    return touple2
+            else:
+                if touple1[0] < touple2[0]:
+                    return touple1
+                else:
+                    return touple2
+
+    def replace_at_index1(tup, ix, val):
+        lst = list(tup)
+        lst[ix] = val
+        return tuple(lst)
 
     def generatePath(self, playerindex, depth, state, numberOfAgents, prevState, action):
-        #print("  ")
-        #print(" ***** GENERATE PATH CALLED ****** ")
-        #print("  ")
+        print("  ")
+        print(" ***** GENERATE PATH CALLED ****** ")
+        print("  ")
+        print(action, "THIS IS THE ACTION THAT WAS CALLED")
         currentLevel = depth # Begynner som 4
         legalActions = state.getLegalActions(playerindex) # ['Left', 'Center', 'Right']
         #print("LegalActions: {} for playerindex: {} in level: {}".format(legalActions,playerindex,depth))
         # **** Terminal node- Base case:
         #print("Legal action TRUE/FALSE? : {}".format(not legalActions))
-
-        if not legalActions or currentLevel == 0:
+#
+        if state.isWin() or state.isLose() or currentLevel == 0:
             #score = self.evaluationFunction(prevState)
             score = scoreEvaluationFunction(state)
-            #print("this is the score from the basecase:  {} ".format(score))
+            t = (score, action)
+            return t
+           # print("this is the score from the basecase:  {} ".format(score))
 
-            return score  # Retruning the score of that terminal node
+            #return score  # Retruning the score of that terminal node
 
         # ******* Non-terminal node: Generate successors! *****
         # tuppel(score, action)
 
         # ****** Player is pacman, need to max! ******
         if playerindex == 0:
-            #print("Pacman is making a decision in this level: {} ..... :".format(depth))
+            # print("Pacman is making a decision in this level: {} ..... :".format(depth))
             bestScore = (-999999,'Blank')
             prevState = state #This is the state we are looking at actions from!
             for action in legalActions:
                 # ***** Goes on to another state *****
                 nextState = state.generateSuccessor(playerindex, action)
                 # changing the playerIndex to a min player
-                playerIndex = (playerindex + 1) % numberOfAgents
-                t1 = (self.generatePath(playerIndex, currentLevel - 1, nextState,numberOfAgents, prevState, action), action)  # This returns a value!
-                #print("PACMAN BEFORE CHOSEN: This is score t1: {}, this is score bestScore: {}".format(t1, bestScore))
+                playerIndex = (playerindex + 1)
+                #print (playerIndex, "DETTE ER PLAYERINDEX FRA MAX")
+
+                t1 = (self.generatePath(playerIndex, currentLevel - 1, nextState, numberOfAgents, prevState, action))
+                # This returns a value!
+                print("PACMAN BEFORE CHOSEN: This is score t1: {}, this is score bestScore: {}".format(t1, bestScore))
+
+                #bestScore = (bestScore[0], action)
                 bestScore = self.maximum(bestScore, t1)
-                #print("CHOSEN IN PACMAN IF : This is the chosen bestScore: {}".format(bestScore))
+
+                print(bestScore, "Dette er best score!*************************")
+                #print(bestScore[1], "Dette er bestScore[1")
+
+
+                print("AFTER CHOSEN PACMAN : This is the chosen bestScore: {}".format(bestScore))
                 # bestScore = (-999, 'Blank), t1 = (200,'Left')
                 # Hvordan returnerer man den handlingen som horer til den beste verdien?
             # Send the highest value up in the tree:
-            #print("PACMAN AFTER FOR BRING UP THIS BESTSCORE: {}".format(bestScore))
+            #print("SELECTED CHILD PACMAN: {}".format(bestScore))
             return bestScore
         else:
-            #print("The ghost with this id: {} is making a decision in this level: {}...".format(playerindex,depth))
+            # print("The ghost with this id: {} is making a decision in this level: {}...".format(playerindex,depth))
             bestScore = (9999999,'Blank')
             prevState = state
             for action in legalActions:
                 nextState = state.generateSuccessor(playerindex,action)
                 playerIndex = (playerindex + 1) % numberOfAgents
-                t1 = (self.generatePath(playerIndex, currentLevel - 1, nextState, numberOfAgents, prevState, action), action)
-                #print(" GHOST BEFORE CHOSEN: This is score t1: {}, this is score bestScore: {}".format(t1, bestScore))
+                #print (playerIndex, "DETTE ER PLAYERINDEX")
+                print(action, currentLevel, "this is the action")
+                t1 = (self.generatePath(playerIndex, currentLevel - 1, nextState, numberOfAgents, prevState, action))
+                print(" GHOST BEFORE CHOSEN: This is score t1: {}, this is score bestScore: {}".format(t1, bestScore))
                 bestScore = self.minimum(bestScore, t1)
-                # print("CHOSEN IN GHOST IF : This is the chosen bestScore: {}".format(bestScore))
-            #print("GHOST AFTER FOR BRING UP THIS BESTSCORE: {}".format(bestScore))
+                print("CHOSEN AFTER BESTSCORE GHOST: This is the chosen bestScore: {}".format(bestScore))
+            print("SELECTED CHILD GHOST: {}".format(bestScore))
             return bestScore
 
 
@@ -201,13 +261,15 @@ class MinimaxAgent(MultiAgentSearchAgent):
         "*** YOUR CODE HERE ***"
         playerIndexes = list(range(gameState.getNumAgents()))
         startState = gameState
+        #print(gameState.getLegalActions(0), "These are the legal actions!")
         # print "dintekst", gameState.getNumAgents()
         initialDepth = gameState.getNumAgents() * self.depth
         action = 'None'
         chosen = self.generatePath(0, initialDepth, startState, gameState.getNumAgents(), startState, action)
+        #print (chosen[1], "Dette er svaret som returneres!")
         return chosen[1]
         #print("This is the final chosen touple: {}".format(chosen[1]))
-        #print(chosen[1])
+        # print(chosen[1])
         # util.raiseNotDefined()
 
 

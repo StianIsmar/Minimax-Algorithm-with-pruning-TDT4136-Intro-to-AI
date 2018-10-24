@@ -171,10 +171,10 @@ class MinimaxAgent(MultiAgentSearchAgent):
         return tuple(lst)
 
     def generatePath(self, playerindex, depth, state, numberOfAgents, prevState, action):
-        print("  ")
-        print(" ***** GENERATE PATH CALLED ****** ")
-        print("  ")
-        print(action, "THIS IS THE ACTION THAT WAS CALLED")
+        # print("  ")
+        # print(" ***** GENERATE PATH CALLED ****** ")
+        # print("  ")
+        # print(action, "THIS IS THE ACTION THAT WAS CALLED")
         currentLevel = depth # Begynner som 4
         legalActions = state.getLegalActions(playerindex) # ['Left', 'Center', 'Right']
         #print("LegalActions: {} for playerindex: {} in level: {}".format(legalActions,playerindex,depth))
@@ -204,22 +204,14 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 # changing the playerIndex to a min player
                 playerIndex = (playerindex + 1)
                 #print (playerIndex, "DETTE ER PLAYERINDEX FRA MAX")
-
                 t1 = (self.generatePath(playerIndex, currentLevel - 1, nextState, numberOfAgents, prevState, action))
-                # This returns a value!
-                print("PACMAN BEFORE CHOSEN: This is score t1: {}, this is score bestScore: {}".format(t1, bestScore))
-
-                #bestScore = (bestScore[0], action)
+                t1 = (t1[0], action)
+                # print("PACMAN BEFORE CHOSEN: This is score t1: {}, this is score bestScore: {}".format(t1, bestScore))
                 bestScore = self.maximum(bestScore, t1)
-
-                print(bestScore, "Dette er best score!*************************")
+                # print(bestScore, "Dette er best score!*************************")
                 #print(bestScore[1], "Dette er bestScore[1")
-
-
-                print("AFTER CHOSEN PACMAN : This is the chosen bestScore: {}".format(bestScore))
-                # bestScore = (-999, 'Blank), t1 = (200,'Left')
+                # print("AFTER CHOSEN PACMAN : This is the chosen bestScore: {}".format(bestScore))
                 # Hvordan returnerer man den handlingen som horer til den beste verdien?
-            # Send the highest value up in the tree:
             #print("SELECTED CHILD PACMAN: {}".format(bestScore))
             return bestScore
         else:
@@ -230,12 +222,13 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 nextState = state.generateSuccessor(playerindex,action)
                 playerIndex = (playerindex + 1) % numberOfAgents
                 #print (playerIndex, "DETTE ER PLAYERINDEX")
-                print(action, currentLevel, "this is the action")
+                # print(action, currentLevel, "this is the action")
                 t1 = (self.generatePath(playerIndex, currentLevel - 1, nextState, numberOfAgents, prevState, action))
-                print(" GHOST BEFORE CHOSEN: This is score t1: {}, this is score bestScore: {}".format(t1, bestScore))
+                t1 = (t1[0], action)
+                # print(" GHOST BEFORE CHOSEN: This is score t1: {}, this is score bestScore: {}".format(t1, bestScore))
                 bestScore = self.minimum(bestScore, t1)
-                print("CHOSEN AFTER BESTSCORE GHOST: This is the chosen bestScore: {}".format(bestScore))
-            print("SELECTED CHILD GHOST: {}".format(bestScore))
+                # print("CHOSEN AFTER BESTSCORE GHOST: This is the chosen bestScore: {}".format(bestScore))
+            # print("SELECTED CHILD GHOST: {}".format(bestScore))
             return bestScore
 
 

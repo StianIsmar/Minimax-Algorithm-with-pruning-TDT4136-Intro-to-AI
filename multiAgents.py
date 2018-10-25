@@ -165,74 +165,42 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 else:
                     return touple2
 
-    def replace_at_index1(tup, ix, val):
-        lst = list(tup)
-        lst[ix] = val
-        return tuple(lst)
-
-    def generatePath(self, playerindex, depth, state, numberOfAgents, prevState, action):
-        # print("  ")
-        # print(" ***** GENERATE PATH CALLED ****** ")
-        # print("  ")
-        # print(action, "THIS IS THE ACTION THAT WAS CALLED")
-        currentLevel = depth # Begynner som 4
-        legalActions = state.getLegalActions(playerindex) # ['Left', 'Center', 'Right']
-        #print("LegalActions: {} for playerindex: {} in level: {}".format(legalActions,playerindex,depth))
-        # **** Terminal node- Base case:
-        #print("Legal action TRUE/FALSE? : {}".format(not legalActions))
-#
+    def generatePath(self, playerindex, depth, state, numberOfAgents, action):
+        currentLevel = depth
+        legalActions = state.getLegalActions(playerindex)
         if state.isWin() or state.isLose() or currentLevel == 0:
-            #score = self.evaluationFunction(prevState)
             score = scoreEvaluationFunction(state)
             t = (score, action)
             return t
-           # print("this is the score from the basecase:  {} ".format(score))
-
-            #return score  # Retruning the score of that terminal node
-
-        # ******* Non-terminal node: Generate successors! *****
-        # tuppel(score, action)
-
         # ****** Player is pacman, need to max! ******
         if playerindex == 0:
             # print("Pacman is making a decision in this level: {} ..... :".format(depth))
             bestScore = (-999999,'Blank')
-            prevState = state #This is the state we are looking at actions from!
             for action in legalActions:
                 # ***** Goes on to another state *****
                 nextState = state.generateSuccessor(playerindex, action)
                 # changing the playerIndex to a min player
                 playerIndex = (playerindex + 1)
-                #print (playerIndex, "DETTE ER PLAYERINDEX FRA MAX")
-                t1 = (self.generatePath(playerIndex, currentLevel - 1, nextState, numberOfAgents, prevState, action))
+                t1 = (self.generatePath(playerIndex, currentLevel - 1, nextState, numberOfAgents, action))
                 t1 = (t1[0], action)
                 # print("PACMAN BEFORE CHOSEN: This is score t1: {}, this is score bestScore: {}".format(t1, bestScore))
                 bestScore = self.maximum(bestScore, t1)
-                # print(bestScore, "Dette er best score!*************************")
-                #print(bestScore[1], "Dette er bestScore[1")
                 # print("AFTER CHOSEN PACMAN : This is the chosen bestScore: {}".format(bestScore))
-                # Hvordan returnerer man den handlingen som horer til den beste verdien?
             #print("SELECTED CHILD PACMAN: {}".format(bestScore))
             return bestScore
         else:
             # print("The ghost with this id: {} is making a decision in this level: {}...".format(playerindex,depth))
             bestScore = (9999999,'Blank')
-            prevState = state
             for action in legalActions:
                 nextState = state.generateSuccessor(playerindex,action)
                 playerIndex = (playerindex + 1) % numberOfAgents
-                #print (playerIndex, "DETTE ER PLAYERINDEX")
-                # print(action, currentLevel, "this is the action")
-                t1 = (self.generatePath(playerIndex, currentLevel - 1, nextState, numberOfAgents, prevState, action))
+                t1 = (self.generatePath(playerIndex, currentLevel - 1, nextState, numberOfAgents, action))
                 t1 = (t1[0], action)
                 # print(" GHOST BEFORE CHOSEN: This is score t1: {}, this is score bestScore: {}".format(t1, bestScore))
                 bestScore = self.minimum(bestScore, t1)
                 # print("CHOSEN AFTER BESTSCORE GHOST: This is the chosen bestScore: {}".format(bestScore))
             # print("SELECTED CHILD GHOST: {}".format(bestScore))
             return bestScore
-
-
-
 
     def getAction(self, gameState):
         """
@@ -254,30 +222,119 @@ class MinimaxAgent(MultiAgentSearchAgent):
         "*** YOUR CODE HERE ***"
         playerIndexes = list(range(gameState.getNumAgents()))
         startState = gameState
-        #print(gameState.getLegalActions(0), "These are the legal actions!")
-        # print "dintekst", gameState.getNumAgents()
         initialDepth = gameState.getNumAgents() * self.depth
         action = 'None'
-        chosen = self.generatePath(0, initialDepth, startState, gameState.getNumAgents(), startState, action)
-        #print (chosen[1], "Dette er svaret som returneres!")
+        chosen = self.generatePath(0, initialDepth, startState, gameState.getNumAgents(), action)
         return chosen[1]
-        #print("This is the final chosen touple: {}".format(chosen[1]))
-        # print(chosen[1])
         # util.raiseNotDefined()
-
-
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
       Your minimax agent with alpha-beta pruning (question 3)
     """
+    def maximum(self, touple1, touple2):  # (14, 'LEFT'), (20,'RIGHT')
+        t1 = touple1[0]
+        t2 = touple2[0]
+        # First touple
+        if isinstance(t1, tuple):
+            if isinstance(t2, tuple):
+                # both tuple
+                if touple1[0][0] > touple2[0][0]:
+                    return touple1
+                else:
+                    return touple2
+            if touple1[0][0] > touple2[0]:
+                return touple1
+            else:
+                return touple2
+        else:
+            if isinstance(t2, tuple):
+                # print("DETTE CASET VI HAR ______________________________________________________")
+                if touple1[0] > touple2[0][0]:
+                    return touple1
+                else:
+                    return touple2
+            else:
+                if touple1[0] > touple2[0]:
+                    return touple1
+                else:
+                    return touple2
 
+    def minimum(self, touple1, touple2):  # (14, 'LEFT'), (20,'RIGHT')
+        t1 = touple1[0]
+        t2 = touple2[0]
+        # First touple
+        if isinstance(t1, tuple):
+            if isinstance(t2, tuple):
+                # both tuple
+                if touple1[0][0] < touple2[0][0]:
+                    return touple1
+                else:
+                    return touple2
+            if touple1[0][0] < touple2[0]:
+                return touple1
+            else:
+                return touple2
+        else:
+            if isinstance(t2, tuple):
+                if touple1[0] < touple2[0][0]:
+                    return touple1
+                else:
+                    return touple2
+            else:
+                if touple1[0] < touple2[0]:
+                    return touple1
+                else:
+                    return touple2
+
+    def generatePathAlpthBeta(self, playerindex, depth, state, numberOfAgents, action):
+        currentLevel = depth
+        legalActions = state.getLegalActions(playerindex)
+        if state.isWin() or state.isLose() or currentLevel == 0:
+            score = scoreEvaluationFunction(state)
+            t = (score, action)
+            return t
+        # ****** Player is pacman, need to max! ******
+        if playerindex == 0:
+            # print("Pacman is making a decision in this level: {} ..... :".format(depth))
+            bestScore = (-999999, 'Blank')
+            for action in legalActions:
+                # ***** Goes on to another state *****
+                nextState = state.generateSuccessor(playerindex, action)
+                # changing the playerIndex to a min player
+                playerIndex = (playerindex + 1)
+                t1 = (self.generatePathAlpthBeta(playerIndex, currentLevel - 1, nextState, numberOfAgents, action))
+                t1 = (t1[0], action)
+                # print("PACMAN BEFORE CHOSEN: This is score t1: {}, this is score bestScore: {}".format(t1, bestScore))
+                bestScore = self.maximum(bestScore, t1)
+                # print("AFTER CHOSEN PACMAN : This is the chosen bestScore: {}".format(bestScore))
+            # print("SELECTED CHILD PACMAN: {}".format(bestScore))
+            return bestScore
+        else:
+            # print("The ghost with this id: {} is making a decision in this level: {}...".format(playerindex,depth))
+            bestScore = (9999999, 'Blank')
+            for action in legalActions:
+                nextState = state.generateSuccessor(playerindex, action)
+                playerIndex = (playerindex + 1) % numberOfAgents
+                t1 = (self.generatePathAlpthBeta(playerIndex, currentLevel - 1, nextState, numberOfAgents, action))
+                t1 = (t1[0], action)
+                # print(" GHOST BEFORE CHOSEN: This is score t1: {}, this is score bestScore: {}".format(t1, bestScore))
+                bestScore = self.minimum(bestScore, t1)
+                # print("CHOSEN AFTER BESTSCORE GHOST: This is the chosen bestScore: {}".format(bestScore))
+            # print("SELECTED CHILD GHOST: {}".format(bestScore))
+            return bestScore
     def getAction(self, gameState):
         """
           Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        playerIndexes = list(range(gameState.getNumAgents()))
+        startState = gameState
+        initialDepth = gameState.getNumAgents() * self.depth
+        action = 'None'
+        chosen = self.generatePathAlpthBeta(0, initialDepth, startState, gameState.getNumAgents(), action)
+        return chosen[1]
+        # util.raiseNotDefined()
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
@@ -292,6 +349,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
           legal moves.
         """
         "*** YOUR CODE HERE ***"
+
         util.raiseNotDefined()
 
 def betterEvaluationFunction(currentGameState):

@@ -232,7 +232,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     """
       Your minimax agent with alpha-beta pruning (question 3)
     """
-    def maximum(self, touple1, touple2):  # (14, 'LEFT'), (20,'RIGHT')
+    def maximumPrune(self, touple1, touple2):  # (14, 'LEFT'), (20,'RIGHT')
         t1 = touple1[0]
         t2 = touple2[0]
         # First touple
@@ -260,7 +260,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 else:
                     return touple2
 
-    def minimum(self, touple1, touple2):  # (14, 'LEFT'), (20,'RIGHT')
+    def minimumPrune(self, touple1, touple2):  # (14, 'LEFT'), (20,'RIGHT')
         t1 = touple1[0]
         t2 = touple2[0]
         # First touple
@@ -287,7 +287,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 else:
                     return touple2
 
-    def generatePathAlpthBeta(self, playerindex, depth, state, numberOfAgents, action):
+    def generatePathAlphaBeta(self, playerindex, depth, state, numberOfAgents, action, alpha, beta):
         currentLevel = depth
         legalActions = state.getLegalActions(playerindex)
         if state.isWin() or state.isLose() or currentLevel == 0:
@@ -303,10 +303,13 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 nextState = state.generateSuccessor(playerindex, action)
                 # changing the playerIndex to a min player
                 playerIndex = (playerindex + 1)
-                t1 = (self.generatePathAlpthBeta(playerIndex, currentLevel - 1, nextState, numberOfAgents, action))
+                t1 = (self.generatePathAlphaBeta(playerIndex, currentLevel - 1, nextState, numberOfAgents, action, alpha, beta))
                 t1 = (t1[0], action)
                 # print("PACMAN BEFORE CHOSEN: This is score t1: {}, this is score bestScore: {}".format(t1, bestScore))
-                bestScore = self.maximum(bestScore, t1)
+                bestScore = self.maximumPrune(bestScore, t1)
+                alpha = self.maximumPrune(alpha, bestScore)
+                if beta < alpha:
+                    break
                 # print("AFTER CHOSEN PACMAN : This is the chosen bestScore: {}".format(bestScore))
             # print("SELECTED CHILD PACMAN: {}".format(bestScore))
             return bestScore
@@ -316,10 +319,13 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             for action in legalActions:
                 nextState = state.generateSuccessor(playerindex, action)
                 playerIndex = (playerindex + 1) % numberOfAgents
-                t1 = (self.generatePathAlpthBeta(playerIndex, currentLevel - 1, nextState, numberOfAgents, action))
+                t1 = (self.generatePathAlphaBeta(playerIndex, currentLevel - 1, nextState, numberOfAgents, action, alpha, beta))
                 t1 = (t1[0], action)
                 # print(" GHOST BEFORE CHOSEN: This is score t1: {}, this is score bestScore: {}".format(t1, bestScore))
-                bestScore = self.minimum(bestScore, t1)
+                bestScore = self.minimumPrune(bestScore, t1)
+                beta = self.minimumPrune(beta,bestScore)
+                if beta < alpha:
+                    break
                 # print("CHOSEN AFTER BESTSCORE GHOST: This is the chosen bestScore: {}".format(bestScore))
             # print("SELECTED CHILD GHOST: {}".format(bestScore))
             return bestScore
@@ -332,7 +338,9 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         startState = gameState
         initialDepth = gameState.getNumAgents() * self.depth
         action = 'None'
-        chosen = self.generatePathAlpthBeta(0, initialDepth, startState, gameState.getNumAgents(), action)
+        alpha = (-888888, 'blank')
+        beta = (888888,'blank')
+        chosen = self.generatePathAlphaBeta(0, initialDepth, startState, gameState.getNumAgents(), action, alpha, beta)
         return chosen[1]
         # util.raiseNotDefined()
 
